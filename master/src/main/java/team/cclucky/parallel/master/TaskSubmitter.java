@@ -1,0 +1,89 @@
+package team.cclucky.parallel.master;
+
+import team.cclucky.parallel.core.Worker;
+import team.cclucky.parallel.core.config.ClientConfig;
+import team.cclucky.parallel.core.task.*;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class TaskSubmitter {
+    private final TaskScheduler scheduler;
+    private static final Map<String, Worker> workerNodes = new ConcurrentHashMap<>();
+    
+    public TaskSubmitter(TaskScheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+    
+    public <T> CompletableFuture<TaskResult<T>> submit(Task<T> task, ClientConfig config) {
+        if (task == null || config == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        
+        // 生成任务ID
+        if (task.getTaskId() == null) {
+            task.setTaskId(generateTaskId());
+        }
+        
+        // 应用配置
+        task.setConfig(config.toTaskConfig());
+        
+        // 提交任务并监控状态
+        return scheduler.scheduleTask(task)
+            .whenComplete((result, error) -> {
+                if (error != null) {
+                    task.setStatus(TaskStatus.FAILED);
+                } else if (result != null) {
+                    task.setStatus(TaskStatus.COMPLETED);
+                }
+            });
+    }
+    
+    public <T> CompletableFuture<List<TaskSplitResult<T>>> submitToWorker(
+            Worker worker,
+            List<TaskSplit<T>> taskSplits,
+            TaskContext context) {
+        CompletableFuture<List<TaskSplitResult<T>>> future = new CompletableFuture<>();
+        
+        if (worker == null || taskSplits == null || context == null) {
+            future.completeExceptionally(new IllegalArgumentException("Invalid parameters"));
+            return future;
+        }
+        
+        if (!worker.isAvailable()) {
+            future.completeExceptionally(
+                new IllegalStateException("Worker is not available: " + worker.getWorkerId()));
+            return future;
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return taskSplits.stream()
+                        .flatMap(split -> worker.executeTask(split).stream())
+                        .collect(Collectors.toList());
+            } catch (Exception e) {
+                future.completeExceptionally(e);
+                return null;
+            }
+        });
+    }
+    
+    public TaskStatus getStatus(String endpoint, String taskId) {
+        if (endpoint == null || taskId == null) {
+            return TaskStatus.FAILED;
+        }
+        return scheduler.getTaskStatus(taskId);
+    }
+    
+    private static String generateTaskId() {
+        return "task-" + System.currentTimeMillis() + "-" + 
+               Math.abs(System.nanoTime() % 10000);
+    }
+    
+    public static Worker getWorker(String endpoint) {
+        return endpoint != null ? workerNodes.get(endpoint) : null;
+    }
+} 
