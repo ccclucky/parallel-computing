@@ -3,9 +3,12 @@ package team.cclucky.parallel.core.registry;
 import team.cclucky.parallel.core.Worker;
 import team.cclucky.parallel.core.model.WorkerStatus;
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * @author cclucky
+ */
 public interface IWorkerRegistry {
 
     List<Worker> getAvailableWorkers();

@@ -1,5 +1,6 @@
 package team.cclucky.parallel.master;
 
+import org.apache.dubbo.config.annotation.DubboService;
 import team.cclucky.parallel.core.Worker;
 import team.cclucky.parallel.core.model.WorkerStatus;
 import team.cclucky.parallel.core.registry.IWorkerRegistry;
@@ -9,6 +10,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * @author cclucky
+ */
+@DubboService
 public class WorkerRegistry implements IWorkerRegistry {
     private final static Map<String, Worker> workers = new ConcurrentHashMap<>();
 

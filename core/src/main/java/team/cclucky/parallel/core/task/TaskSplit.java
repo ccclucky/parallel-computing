@@ -4,16 +4,23 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Function;
 
-public class TaskSplit<T> implements Serializable {
+/**
+ * @author cclucky
+ */
+public class TaskSplit<T> extends BaseTask<T> implements Serializable {
     private String taskId;
     private String splitId;
     private T data;
     private TaskSplitStatus status;
     private int partitionNum;
     private Class<?> dataType;
-    private Function<TaskSplit<T>, TaskSplitResult<T>> function;
     private int maxRetries = 3;
     private Map<String, Object> metadata;
+
+    public TaskSplit(TaskProcessor<T> processor) {
+        super(processor);
+    }
+
 
     public String getTaskId() {
         return taskId;
@@ -57,14 +64,6 @@ public class TaskSplit<T> implements Serializable {
 
     public Class<?> getDataType() {
         return dataType;
-    }
-
-    public Function<TaskSplit<T>, TaskSplitResult<T>> getFunction() {
-        return function;
-    }
-
-    public void setFunction(Function<TaskSplit<T>, TaskSplitResult<T>> function) {
-        this.function = function;
     }
 
     public void setDataType(Class<?> dataType) {

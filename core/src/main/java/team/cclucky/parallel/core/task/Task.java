@@ -8,7 +8,10 @@ import java.util.logging.Logger;
 
 import java.util.logging.Level;
 
-public abstract class Task<T> implements Serializable {
+/**
+ * @author cclucky
+ */
+public abstract class Task<T> extends BaseTask<T> implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(Task.class.getName());
     
@@ -24,19 +27,11 @@ public abstract class Task<T> implements Serializable {
     
     private final List<TaskStatusListener> statusListeners = new CopyOnWriteArrayList<>();
     
-    protected Task() {
+    protected Task(TaskProcessor<T> processor) {
+        super(processor);
         this.status = TaskStatus.CREATED;
         this.priority = TaskPriority.NORMAL;
     }
-    
-    // 任务分片方法
-    public abstract List<TaskSplit<T>> split(T input);
-    
-    // 任务执行方法
-    public abstract TaskSplitResult<T> execute(TaskSplit<T> split);
-    
-    // 结果合并方法
-    public abstract TaskResult<T> merge(List<TaskSplitResult<T>> results);
     
     // 任务状态回调
     public void onStatusChange(TaskStatus oldStatus, TaskStatus newStatus) {

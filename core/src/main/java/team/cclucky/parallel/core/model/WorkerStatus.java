@@ -1,6 +1,8 @@
 package team.cclucky.parallel.core.model;
 
-public enum WorkerStatus {
+import java.io.Serializable;
+
+public enum WorkerStatus implements Serializable {
     IDLE,       // 空闲状态
     RUNNING,    // 正在执行任务
     STOPPED,    // 已停止

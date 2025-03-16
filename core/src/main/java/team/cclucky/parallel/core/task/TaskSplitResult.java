@@ -3,6 +3,9 @@ package team.cclucky.parallel.core.task;
 import java.io.Serializable;
 import java.util.Map;
 
+/**
+ * @author cclucky
+ */
 public class TaskSplitResult<T> implements Serializable {
     private String taskId;
     private String splitId;

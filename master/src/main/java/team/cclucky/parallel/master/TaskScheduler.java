@@ -28,7 +28,7 @@ public class TaskScheduler {
         TaskContext context = createTaskContext(task);
 
         // 2. 任务分片
-        List<TaskSplit<T>> splits = task.split(task.getInput());
+        List<TaskSplit<T>> splits = task.getProcessor().split(task);
 
         // 3. 分配Worker节点
         Map<Worker, List<TaskSplit<T>>> allocation =
@@ -38,6 +38,8 @@ public class TaskScheduler {
         List<CompletableFuture<List<TaskSplitResult<T>>>> futures = allocation.entrySet().stream()
                 .map(entry -> taskSubmitter.submitToWorker(entry.getKey(), entry.getValue(), context))
                 .collect(Collectors.toList());
+
+        System.out.println("Submitted tasks to workers");
 
         // 5. 合并结果
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
@@ -50,7 +52,7 @@ public class TaskScheduler {
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-        return task.merge(results);
+        return task.getProcessor().merge(results);
     }
 
     private <T> TaskContext createTaskContext(Task<T> task) {

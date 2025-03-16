@@ -3,13 +3,17 @@ package team.cclucky.parallel.worker;
 import team.cclucky.parallel.core.task.TaskSplit;
 import team.cclucky.parallel.core.task.TaskSplitStatus;
 
+import java.io.Serializable;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TaskExceptionHandler {
+/**
+ * @author cclucky
+ */
+public class TaskExceptionHandler implements Serializable {
     private static final Logger logger = Logger.getLogger(TaskExceptionHandler.class.getName());
     private static final int DEFAULT_RETRY_DELAY_MS = 1000;
     private static final Map<String, Map<String, AtomicInteger>> retryCounters = new ConcurrentHashMap<>();
@@ -54,7 +58,7 @@ public class TaskExceptionHandler {
         try {
             Thread.sleep(calculateRetryDelay(retryCount));
             split.setStatus(TaskSplitStatus.PENDING);
-            split.getFunction().apply(split);
+            split.getProcessor().execute(split);
             split.setStatus(TaskSplitStatus.COMPLETED);
             retryCounters.get(taskId).remove(split.getSplitId());
         } catch (Exception e) {

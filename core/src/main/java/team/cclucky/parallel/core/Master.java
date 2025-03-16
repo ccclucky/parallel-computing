@@ -2,6 +2,9 @@ package team.cclucky.parallel.core;
 
 import java.util.logging.Logger;
 
+/**
+ * @author cclucky
+ */
 public class Master {
     private static final Logger logger = Logger.getLogger(Master.class.getName());
 
@@ -14,15 +17,4 @@ public class Master {
     public int getPort() {
         return port;
     }
-
-    //    public static void main(String[] args) {
-//        int port = 8080; // 默认端口
-//        if (args.length > 0) {
-//            port = Integer.parseInt(args[0]);
-//        }
-//
-//        MasterNode master = new MasterNode(port);
-//        Runtime.getRuntime().addShutdownHook(new Thread(master::stop));
-//        master.start();
-//    }
 }

@@ -2,11 +2,15 @@ package team.cclucky.parallel.worker.heartbeat;
 
 import team.cclucky.parallel.worker.WorkerNode;
 
+import java.io.Serializable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+/**
+ * @author cclucky
+ */
 public class HeartbeatManager {
     private static final Logger logger = Logger.getLogger(HeartbeatManager.class.getName());
     private static final long HEARTBEAT_INTERVAL = 5000; // 5秒

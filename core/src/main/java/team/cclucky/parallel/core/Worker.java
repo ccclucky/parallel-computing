@@ -1,22 +1,27 @@
 package team.cclucky.parallel.core;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import team.cclucky.parallel.core.task.Task;
-import team.cclucky.parallel.core.task.TaskSplit;
 import team.cclucky.parallel.core.model.WorkerMetadata;
 import team.cclucky.parallel.core.model.WorkerStatus;
-import team.cclucky.parallel.core.task.TaskSplitResult;
+import team.cclucky.parallel.core.registry.IWorkerRegistry;
 
-public abstract class Worker {
+/**
+ * @author cclucky
+ */
+public class Worker implements Serializable {
     private static final Logger logger = Logger.getLogger(Worker.class.getName());
 
     protected final String workerId;
     protected final String masterEndpoint;
     protected final WorkerMetadata metadata;
     protected volatile WorkerStatus status;
+
+    // 标记不需要序列化的字段
+    protected transient IWorkerRegistry workerRegistryService;
 
     public Worker(String masterEndpoint) {
         this.workerId = generateWorkerId();
@@ -25,17 +30,11 @@ public abstract class Worker {
         this.status = WorkerStatus.IDLE;
     }
 
-    public abstract void start();
-
-    public abstract void stop();
-
-    // Getters
     public String getWorkerId() { return workerId; }
     public String getMasterEndpoint() { return masterEndpoint; }
     public WorkerMetadata getMetadata() { return metadata; }
     public WorkerStatus getStatus() { return status; }
 
-    // Status management
     public void setStatus(WorkerStatus newStatus) {
         WorkerStatus oldStatus = this.status;
         this.status = newStatus;
@@ -69,5 +68,4 @@ public abstract class Worker {
         return status == WorkerStatus.IDLE || status == WorkerStatus.RUNNING;
     }
 
-    public abstract <T> List<TaskSplitResult<T>> executeTask(TaskSplit<T> taskSplit);
 }
